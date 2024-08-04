@@ -223,7 +223,7 @@ function Get-MSCatalogUpdate {
     } catch {
         $ProgressPreference = $ProgPref
         if ($_.Exception.Message -like "We did not find*") {
-            Write-Warning $_.Exception.Message
+            Write-Warning "We did not find any results matching the search term."
         } else {
             throw $_
         }
