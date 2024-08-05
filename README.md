@@ -53,7 +53,7 @@ Save-MSCatalogUpdate -update $update -Destination ".\"
 Use the Save-MSCatalogOutput function to save the output from the Get-MSCatalogUpdate command to a CSV file. This is useful for keeping a record of updates retrieved from the Microsoft Update Catalog.
 
 ```powershell
-Save-MSCatalogOutput -update $update
+Save-MSCatalogOutput -Update $update -Destination "C:\temp\Updates2024.csv"
 ```
 
 ## HtmlAgilityPack
