@@ -1,4 +1,10 @@
-﻿function Save-MSCatalogOutput {
+﻿<#
+    .SYNOPSIS
+        Save output from Get-MSCatalogUpdate to csv file.
+    .EXAMPLE
+        Save-MSCatalogOutput -Update $update -Destination ".\output.csv"
+#>
+function Save-MSCatalogOutput {
     param (
         [Parameter(
             Mandatory = $true,
