@@ -50,10 +50,16 @@ Save-MSCatalogUpdate -update $update -Destination ".\"
 
 ## Save-MSCatalogOutput
 
-Use the Save-MSCatalogOutput function to save the output from the Get-MSCatalogUpdate command to a CSV file. This is useful for keeping a record of updates retrieved from the Microsoft Update Catalog.
+The Save-MSCatalogOutput function allows you to save the output from the Get-MSCatalogUpdate command to an Excel file. This is particularly useful for maintaining a record of updates retrieved from the Microsoft Update Catalog.
+
+Before using the Save-MSCatalogOutput function, ensure that you have the ImportExcel module installed. You can install it using the following command:
+```powershell
+Install-Module -Name ImportExcel
+```
+By default, the worksheet name in the Excel file will be named "Updates". However, you can customize the worksheet name by specifying the -WorksheetName parameter.
 
 ```powershell
-Save-MSCatalogOutput -Update $update -Destination "C:\temp\Updates2024.csv"
+Save-MSCatalogOutput -Update $update -WorksheetName "08_2024_Updates" -Destination "C:\Temp\2024_Updates.xlsx"
 ```
 
 ## HtmlAgilityPack

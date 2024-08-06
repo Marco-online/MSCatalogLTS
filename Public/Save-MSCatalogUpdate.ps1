@@ -3,7 +3,7 @@
         This command is used to download update files from the https://www.catalog.update.microsoft.com website.
 
     .EXAMPLE
-        Save-MSCatalogUpdate -Update $Updates -Destination ".\"
+        Save-MSCatalogUpdate -Update $Update -Destination ".\"
 #>
 function Save-MSCatalogUpdate {
     param (

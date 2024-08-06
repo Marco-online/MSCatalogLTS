@@ -2,7 +2,7 @@
     .SYNOPSIS
         Save output from Get-MSCatalogUpdate to csv file.
     .EXAMPLE
-        Save-MSCatalogOutput -Update $update -Destination ".\output.csv"
+        Save-MSCatalogOutput -Update $update -WorksheetName "08_2024_Updates" -Destination "C:\Temp\2024_Updates.xlsx"
 #>
 function Save-MSCatalogOutput {
     param (
@@ -12,16 +12,26 @@ function Save-MSCatalogOutput {
             ParameterSetName = "ByObject"
         )]
         [Object] $Update,
+
         [Parameter(Mandatory = $true)]
-        [string] $Destination
+        [string] $Destination,
+
+        [string] $WorksheetName = "Updates"
     )
+
+    if (-not (Get-Module -Name ImportExcel -ListAvailable)) {
+        try {
+            Import-Module ImportExcel -ErrorAction Stop
+        }
+        catch {
+            Write-Warning "Unable to Import the Excel Module"
+            return
+        }
+    }
 
     if ($Update.Count -gt 1) {
         $Update = $Update | Select-Object -First 1
     }
-
-    $filePath = $Destination
-    $append = Test-Path -Path $filePath
 
     $data = [PSCustomObject]@{
         Title          = $Update.Title
@@ -30,5 +40,11 @@ function Save-MSCatalogOutput {
         LastUpdated    = $Update.LastUpdated.ToString('yyyy/MM/dd')
         Guid           = $Update.Guid
     }
-    $data | Export-Csv -Path $filePath -NoTypeInformation -Encoding UTF8 -Append:$append
+
+    $filePath = $Destination
+    if (Test-Path -Path $filePath) {
+        $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -Append -AutoSize -TableStyle Light1
+    } else {
+        $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -AutoSize -TableStyle Light1
+    }
 }
