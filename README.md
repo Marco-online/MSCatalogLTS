@@ -3,6 +3,8 @@
 MSCatalogLTS is a Long-term support module for searching and downloading updates from https://www.catalog.update.microsoft.com.
 It is cross-platform and runs on both Desktop and Core versions of PowerShell.
 
+[![psgallery](https://img.shields.io/powershellgallery/v/mscatalog?style=flat-square&logo=powershell)](https://www.powershellgallery.com/packages/MSCatalogLTS)
+
 ## Importing the Module
 
 Import the module MSCatalogLTS direct from PSgallery:
