@@ -22,8 +22,6 @@ function Get-UpdateLinks {
     $Links = $DownloadDialog.Content -replace "www.download.windowsupdate", "download.windowsupdate"
 	$Regex = "downloadInformation\[0\]\.files\[0\]\.url\s*=\s*'([^']*)'"
    	$Links = [regex]::Matches($Links, $Regex)
-   
-    foreach ($Link in $Links) {
-    Write-Output $Link.Groups[1].Value
-        }
-    } 
+    $Links[0].Value
+ }
+    
