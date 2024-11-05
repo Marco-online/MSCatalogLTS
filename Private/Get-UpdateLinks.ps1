@@ -20,9 +20,17 @@ function Get-UpdateLinks {
     }
     $DownloadDialog = Invoke-WebRequest @Params
     $Links = $DownloadDialog.Content -replace "www.download.windowsupdate", "download.windowsupdate"
-	$Regex = "downloadInformation\[0\]\.files\[0\]\.url\s*=\s*'([^']*)'"
-   	$Links = [regex]::Matches($Links, $Regex)
-    
-       Write-Output $Links[0].Value
- }
+	$Regex = "downloadInformation\[0\]\.files\[\d+\]\.url\s*=\s*'([^']*kb(\d+)[^']*)'"
+	$Matches = [regex]::Matches($Links, $Regex)
+
+	$KbLinks = foreach ($Match in $Matches) {
+		[PSCustomObject]@{
+			URL = $Match.Groups[1].Value
+			KB  = [int]$Match.Groups[2].Value
+		}
+	}
+
+	$Links = $KbLinks | Sort-Object KB -Descending
+	$Links[0].URL
+	}
     
