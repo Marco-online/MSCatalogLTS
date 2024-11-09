@@ -23,6 +23,11 @@ function Get-UpdateLinks {
 	$Regex = "downloadInformation\[0\]\.files\[\d+\]\.url\s*=\s*'([^']*kb(\d+)[^']*)'"
 	$Matches = [regex]::Matches($Links, $Regex)
 
+    if ($Matches.Count -eq 0) {
+        Write-Warning "No download links found for the specified update."
+        return $null
+    }
+    
 	$KbLinks = foreach ($Match in $Matches) {
 		[PSCustomObject]@{
 			URL = $Match.Groups[1].Value
