@@ -1,6 +1,6 @@
 ﻿<#
     .SYNOPSIS
-        Save output from Get-MSCatalogUpdate to csv file.
+        Save output from Get-MSCatalogUpdate to Excel file.
     .EXAMPLE
         Save-MSCatalogOutput -Update $update -WorksheetName "08_2024_Updates" -Destination "C:\Temp\2024_Updates.xlsx"
 #>
@@ -43,6 +43,10 @@ function Save-MSCatalogOutput {
 
     $filePath = $Destination
     if (Test-Path -Path $filePath) {
+        $existingData = Import-Excel -Path $filePath -WorksheetName $WorksheetName
+        if ($existingData.Guid -contains $Update.Guid) {
+        return
+        }
         $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -Append -AutoSize -TableStyle Light1
     } else {
         $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -AutoSize -TableStyle Light1

@@ -148,7 +148,7 @@ function Get-MSCatalogUpdate {
             $Rows = $Rows | Where-Object {
                 $nodes = $_.SelectNodes("td")
                 if ($nodes -and $nodes.Count -gt 1) {
-                    $nodes[1].InnerText.Trim() -like "*x64*"
+                    $nodes[1].InnerText.Trim() -like "*x64*" -or $nodes[1].InnerText.Trim() -like "*64-Bit*"
                 } else {
                     $false
                 }
@@ -222,8 +222,8 @@ function Get-MSCatalogUpdate {
         $ProgressPreference = $ProgPref
     } catch {
         $ProgressPreference = $ProgPref
-        if ($_.Exception.Message -like "We did not find*") {
-            Write-Warning "We did not find any results matching the search term."
+        if ($_.Exception.Message -like "No updates found matching*") {
+            Write-Warning "No updates found matching the search term."
         } else {
             throw $_
         }
