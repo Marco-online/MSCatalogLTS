@@ -46,7 +46,7 @@ function Save-MSCatalogOutput {
         $existingData = Import-Excel -Path $filePath -WorksheetName $WorksheetName
         if ($existingData.Guid -contains $Update.Guid) {
         return
-        }
+    }
         $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -Append -AutoSize -TableStyle Light1
     } else {
         $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -AutoSize -TableStyle Light1
