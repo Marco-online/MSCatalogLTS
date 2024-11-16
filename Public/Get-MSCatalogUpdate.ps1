@@ -31,18 +31,12 @@ function Get-MSCatalogUpdate {
         [switch] $ExcludeFramework,
 
         [Parameter(Mandatory = $false)]
-        [switch] $GetFramework,
+        [switch] $GetFramework
               
-        [Parameter(Mandatory = $false)]
-        [switch] $Version10,
-                
-        [Parameter(Mandatory = $false)]
-        [switch] $Version11                   
     )
 
 # Default settings for the search
     
-    $Class = $true # Include only Security Updates
     $Bit64 = $true  # Include only x64 updates
     $ExcludePreview = $true # Exclude Preview updates
     $ExcludeDynamic = $true # Exclude Dynamic updates
@@ -155,28 +149,6 @@ function Get-MSCatalogUpdate {
             }
         }
 
-        if ($Version10) {
-            $Rows = $Rows | Where-Object {
-                $nodes = $_.SelectNodes("td")
-                if ($nodes -and $nodes.Count -gt 1) {
-                    $nodes[1].InnerText.Trim() -like "*Windows 10*"
-                } else {
-                    $false
-                }
-            }
-        }
-
-        if ($Version11) {
-            $Rows = $Rows | Where-Object {
-                $nodes = $_.SelectNodes("td")
-                if ($nodes -and $nodes.Count -gt 1) {
-                    $nodes[1].InnerText.Trim() -like "*Windows 11*"
-                } else {
-                    $false
-                }
-            }
-        }
-
         if ($GetFramework) {
             $Rows = $Rows | Where-Object {
                 $nodes = $_.SelectNodes("td")
@@ -188,17 +160,6 @@ function Get-MSCatalogUpdate {
             }
         }
         
-        if ($Class) {
-            $Rows = $Rows | Where-Object {
-                $nodes = $_.SelectNodes("td")
-                if ($nodes -and $nodes.Count -gt 3) {
-                    $nodes[3].InnerText.Trim() -like "*Security Updates*"
-                } else {
-                    $false
-                }
-            }
-        }
-
         if ($ExcludeFramework) {
             $Rows = $Rows | Where-Object {
                 $nodes = $_.SelectNodes("td")
