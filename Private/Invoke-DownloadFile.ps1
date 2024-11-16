@@ -5,15 +5,7 @@ function Invoke-DownloadFile {
         [string] $Path
     )
     
-    try {
-        if (Test-Path $Path) {
-            $Hash = Get-FileHash -Path $Path -Algorithm SHA1
-            if ($Path -match "$($Hash.Hash)\.msu$") {
-                Write-Verbose "File already exists"
-                return
-            }
-        }
-        
+    try {      
         Set-TempSecurityProtocol
         
         $WebClient = [System.Net.WebClient]::new()
