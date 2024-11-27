@@ -37,6 +37,12 @@ function Invoke-CatalogRequest {
                 "__VIEWSTATEGENERATOR" = $ViewStateGenerator
             }
         }
+
+        $Headers = @{
+            "Cache-Control" = "no-cache"
+            "Pragma"        = "no-cache"
+        }
+
         $Params = @{
             Uri = $Uri
             Method = $Method
@@ -53,7 +59,7 @@ function Invoke-CatalogRequest {
             return
         }
 
-        $Results = Invoke-WebRequest @Params
+        $Results = Invoke-WebRequest @Params -Headers $Headers
         $Stopwatch.Stop()
 
         if ($ShowDebug) {
