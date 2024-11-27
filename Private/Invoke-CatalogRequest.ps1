@@ -28,6 +28,7 @@ function Invoke-CatalogRequest {
     try {
         Set-TempSecurityProtocol
 
+        $ReqBody = $null
         if ($Method -eq "Post") {
             $ReqBody = @{
                 "__EVENTARGUMENT" = $EventArgument
