@@ -67,14 +67,19 @@ function Invoke-CatalogRequest {
         if ($null -eq $NoResults) {
             $ErrorText = $HtmlDoc.GetElementbyId("errorPageDisplayedError")
             if ($ErrorText) {
-                throw "The catalog.microsoft.com site has encountered an error. Please try again later."
+                $ErrorCode = $ErrorText.InnerText -match '8DDD0010'
+                if ($ErrorCode) {
+                    throw "The catalog.microsoft.com site has encountered an error with code 8DDD0010. Please try again later."
+                } else {
+                    throw "The catalog.microsoft.com site has encountered an error. Please try again later."
+                }
             } else {
                 [MSCatalogResponse]::new($HtmlDoc)
             }
         }       
-            } catch {
-                Write-Warning "$_"
-            } finally {
-                Set-TempSecurityProtocol -ResetToDefault
-            }
-        }
+    } catch {
+        Write-Warning "$_"
+    } finally {
+        Set-TempSecurityProtocol -ResetToDefault
+    }
+}
