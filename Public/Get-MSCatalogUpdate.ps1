@@ -3,7 +3,7 @@
         This command is used to retrieve updates from the https://www.catalog.update.microsoft.com website.
 
     .EXAMPLE
-        $update = Get-MSCatalogUpdate -AllPages -Search "Cumulative Update for Windows 10 Version 21H2" -GetFramework
+        $update = Get-MSCatalogUpdate -AllPages -Search "Cumulative Update for Windows 10 Version 21H2" -GetFramework -ShowDebug
 #>
 function Get-MSCatalogUpdate {  
     [CmdLetBinding()]
@@ -31,8 +31,9 @@ function Get-MSCatalogUpdate {
         [switch] $ExcludeFramework,
 
         [Parameter(Mandatory = $false)]
-        [switch] $GetFramework
-              
+        [switch] $GetFramework,
+
+        [switch] $ShowDebug
     )
 
 # Default settings for the search
@@ -46,7 +47,7 @@ function Get-MSCatalogUpdate {
         $ProgressPreference = "SilentlyContinue"
 
         $Uri = "https://www.catalog.update.microsoft.com/Search.aspx?q=$([uri]::EscapeDataString($Search))"
-        $Res = Invoke-CatalogRequest -Uri $Uri
+        $Res = Invoke-CatalogRequest -Uri $Uri -ShowDebug:$showDebug
 
         if ($PSBoundParameters.ContainsKey("SortBy")) {
             $SortParams = @{
@@ -180,13 +181,12 @@ function Get-MSCatalogUpdate {
         } else {
             Write-Warning "No updates found matching the search term."
         }
-        $ProgressPreference = $ProgPref
     } catch {
-        $ProgressPreference = $ProgPref
         if ($_.Exception.Message -like "No updates found matching*") {
             Write-Warning "No updates found matching the search term."
         } else {
-            throw $_
+            Write-Warning "We did not find any results for $Search"
         }
+        $ProgressPreference = $ProgPref
     }
 }

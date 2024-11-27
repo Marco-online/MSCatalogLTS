@@ -20,7 +20,9 @@ function Invoke-CatalogRequest {
         [string] $ViewState,
 
         [Parameter(Mandatory = $false)]
-        [string] $ViewStateGenerator
+        [string] $ViewStateGenerator,
+
+        [switch] $ShowDebug
     )
 
     try {
@@ -43,7 +45,22 @@ function Invoke-CatalogRequest {
             UseBasicParsing = $true
             ErrorAction = "Stop"
         }
+
+        $Stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+        if ($Stopwatch.Elapsed.TotalSeconds -ge 60) {
+            Write-Warning "Timeout reached (60 seconds)"
+            Set-TempSecurityProtocol -ResetToDefault
+            return
+        }
+
         $Results = Invoke-WebRequest @Params
+        $Stopwatch.Stop()
+
+        if ($ShowDebug) {
+            Write-Host "DEBUG: Request $Uri" -ForegroundColor yellow 
+            Write-Host "DEBUG: Request completed in $($Stopwatch.Elapsed.TotalSeconds) seconds" -ForegroundColor yellow            
+        }
+
         $HtmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
         $HtmlDoc.LoadHtml($Results.RawContent.ToString())
         $NoResults = $HtmlDoc.GetElementbyId("ctl00_catalogBody_noResultText")
@@ -54,11 +71,10 @@ function Invoke-CatalogRequest {
             } else {
                 [MSCatalogResponse]::new($HtmlDoc)
             }
-        } else {
-            throw "$($NoResults.InnerText)$($Uri.Split("q=")[-1])"
+        }       
+            } catch {
+                Write-Warning "$_"
+            } finally {
+                Set-TempSecurityProtocol -ResetToDefault
+            }
         }
-        Set-TempSecurityProtocol -ResetToDefault
-    } catch {
-        throw $_
-    }
-}
