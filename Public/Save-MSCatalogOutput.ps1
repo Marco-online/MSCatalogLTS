@@ -1,10 +1,4 @@
-﻿<#
-    .SYNOPSIS
-        Save output from Get-MSCatalogUpdate to Excel file.
-    .EXAMPLE
-        Save-MSCatalogOutput -Update $update -WorksheetName "08_2024_Updates" -Destination "C:\Temp\2024_Updates.xlsx"
-#>
-function Save-MSCatalogOutput {
+﻿function Save-MSCatalogOutput {
     param (
         [Parameter(
             Mandatory = $true,

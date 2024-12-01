@@ -13,6 +13,11 @@ Import the module MSCatalogLTS direct from PSgallery:
 Install-Module -Name MSCatalogLTS
 ```
 
+If you already have the module installed, make sure it is the latest version:
+``` powershell
+Update-Module -Name MSCatalogLTS
+```
+
 ## Get-MSCatalogUpdate
 
 Use the Get-MSCatalogUpdate command to retrieve updates from the Microsoft Update Catalog. By default, this command returns the first 25 items from the search, sorted by the LastUpdated field in descending order.

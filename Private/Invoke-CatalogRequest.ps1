@@ -1,43 +1,14 @@
 function Invoke-CatalogRequest {
-    [CmdletBinding()]
     param (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [string] $Uri,
 
         [Parameter(Mandatory = $false)]
-        [string] $Method = "Get",
-
-        [Parameter(Mandatory = $false)]
-        [string] $EventArgument,
-
-        [Parameter(Mandatory = $false)]
-        [string] $EventTarget,
-
-        [Parameter(Mandatory = $false)]
-        [string] $EventValidation,
-
-        [Parameter(Mandatory = $false)]
-        [string] $ViewState,
-
-        [Parameter(Mandatory = $false)]
-        [string] $ViewStateGenerator,
-
-        [switch] $ShowDebug
+        [string] $Method = "Get"
     )
 
     try {
         Set-TempSecurityProtocol
-
-        $ReqBody = $null
-        if ($Method -eq "Post") {
-            $ReqBody = @{
-                "__EVENTARGUMENT" = $EventArgument
-                "__EVENTTARGET" = $EventTarget
-                "__EVENTVALIDATION" = $EventValidation
-                "__VIEWSTATE" = $ViewState
-                "__VIEWSTATEGENERATOR" = $ViewStateGenerator
-            }
-        }
 
         $Headers = @{
             "Cache-Control" = "no-cache"
@@ -46,47 +17,31 @@ function Invoke-CatalogRequest {
 
         $Params = @{
             Uri = $Uri
-            Method = $Method
-            Body = $ReqBody
-            ContentType = "application/x-www-form-urlencoded"
             UseBasicParsing = $true
             ErrorAction = "Stop"
+            Headers = $Headers
         }
 
-        $Stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-        if ($Stopwatch.Elapsed.TotalSeconds -ge 60) {
-            Write-Warning "Timeout reached (60 seconds)"
-            Set-TempSecurityProtocol -ResetToDefault
-            return
-        }
-
-        $Results = Invoke-WebRequest @Params -Headers $Headers
-        $Stopwatch.Stop()
-
-        if ($ShowDebug) {
-            Write-Host "DEBUG: Request $Uri" -ForegroundColor yellow 
-            Write-Host "DEBUG: Request completed in $($Stopwatch.Elapsed.TotalSeconds) seconds" -ForegroundColor yellow            
-        }
-
+        $Results = Invoke-WebRequest @Params
         $HtmlDoc = [HtmlAgilityPack.HtmlDocument]::new()
         $HtmlDoc.LoadHtml($Results.RawContent.ToString())
         $NoResults = $HtmlDoc.GetElementbyId("ctl00_catalogBody_noResultText")
-        if ($null -eq $NoResults) {
-            $ErrorText = $HtmlDoc.GetElementbyId("errorPageDisplayedError")
-            if ($ErrorText) {
-                $ErrorCode = $ErrorText.InnerText -match '8DDD0010'
-                if ($ErrorCode) {
-                    throw "The catalog.microsoft.com site has encountered an error with code 8DDD0010. Please try again later."
-                } else {
-                    throw "The catalog.microsoft.com site has encountered an error. Please try again later."
-                }
+        $ErrorText = $HtmlDoc.GetElementbyId("errorPageDisplayedError")
+
+        if ($null -eq $NoResults -and $null -eq $ErrorText) {
+            return [MSCatalogResponse]::new($HtmlDoc)
+        } elseif ($ErrorText) {
+            if ($ErrorText.InnerText -match '8DDD0010') {
+                throw "The catalog.microsoft.com site has encountered an error with code 8DDD0010. Please try again later."
             } else {
-                [MSCatalogResponse]::new($HtmlDoc)
+                throw "The catalog.microsoft.com site has encountered an error: $($ErrorText.InnerText)"
             }
-        }       
+        } else {
+            Write-Warning "We did not find any results for $Uri"
+        }
     } catch {
         Write-Warning "$_"
     } finally {
-        Set-TempSecurityProtocol -ResetToDefault
+       Set-TempSecurityProtocol -ResetToDefault
     }
 }
