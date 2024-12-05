@@ -73,5 +73,7 @@ Save-MSCatalogOutput -Update $update -WorksheetName "08_2024_Updates" -Destinati
 
 MSCatalogLTS uses the HtmlAgilityPack library for HTML parsing to ensure cross-platform compatibility. This avoids reliance on the Windows-only ParsedHtml property of the Invoke-WebRequest CmdLet.
 
+## Credits
 
-archive : https://github.com/ryan-jan/MSCatalog
+MSCatalogLTS is heavily inspired by MSCatalog. Some parts of MSCatalogLTS's code are plain copies. Big thanks to the MSCatalog team for creating!
+Archive : https://github.com/ryan-jan/MSCatalog
