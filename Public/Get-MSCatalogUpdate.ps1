@@ -39,7 +39,7 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
         $Rows = $Res.Rows
 
         if ($AllPages) {
-            while ($Res.NextPage -and $PageCount -lt 3) {
+            while ($Res.NextPage -and $PageCount -lt 39) {
                 $PageCount++
                 $All = "$Uri&p=$PageCount"
                 $Res = Invoke-CatalogRequest -Uri $All

@@ -44,6 +44,6 @@ function Save-MSCatalogUpdate {
             Write-Warning "Downloading file $CleanOutFile failed."
         }
     } else {
-        Write-Warning "No valid download links found for GUID '$Guid'."
+        Write-Warning "No valid download link found for GUID '$Guid'."
     }
 }

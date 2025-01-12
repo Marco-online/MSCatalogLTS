@@ -20,11 +20,16 @@ function Get-UpdateLinks {
 
     $DownloadDialog = Invoke-WebRequest @Params
     $Links = $DownloadDialog.Content -replace "www.download.windowsupdate", "download.windowsupdate"
+
     $Regex = "downloadInformation\[0\]\.files\[\d+\]\.url\s*=\s*'([^']*kb(\d+)[^']*)'"
     $DownloadMatches = [regex]::Matches($Links, $Regex)
-    
+
     if ($DownloadMatches.Count -eq 0) {
-        Write-Warning "No download links found for the specified update."
+        $RegexFallback = "downloadInformation\[0\]\.files\[0\]\.url\s*=\s*'([^']*)'"
+        $DownloadMatches = [regex]::Matches($Links, $RegexFallback)
+    }
+
+    if ($DownloadMatches.Count -eq 0) {
         return $null
     }
     
