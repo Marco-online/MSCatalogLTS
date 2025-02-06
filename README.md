@@ -17,10 +17,10 @@ If you already have the module installed, make sure it is the latest version:
 ``` powershell
 Update-Module -Name MSCatalogLTS
 ```
-
 ## Get-MSCatalogUpdate
 
-Use the Get-MSCatalogUpdate command to retrieve updates from the Microsoft Update Catalog. By default, this command returns the first 25 items from the search, sorted by the LastUpdated field in descending order.
+Use the Get-MSCatalogUpdate command to retrieve updates from the Microsoft Update Catalog. 
+By default, this command returns the first 25 items from the search, sorted by the LastUpdated field in descending order.
 
 ```powershell
 Get-MSCatalogUpdate -Search "Cumulative Update for Windows 11 Version 24H2" -ExcludeFramework
@@ -44,6 +44,12 @@ Title                                                                           
 -----                                                                                                       --------   --------------   ----------- ---- 
 2024-07 Cumulative Update for .NET Framework 3.5 and 4.8.1 for Windows 11, version 24H2 for x64 (KB5039894) Windows 11 Security Updates 2024/07/09  70.9 MB
 ```
+## Triggers
+Set triggers to get better results:
+
+-AllPages Get results of maximum 1000 hits
+-ExcludeFramework no .NET Framework updates
+-GetFramework Retrieve .NET Framework updates
 
 ## Save-MSCatalogUpdate
 
