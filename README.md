@@ -44,12 +44,14 @@ Title                                                                           
 -----                                                                                                       --------   --------------   ----------- ---- 
 2024-07 Cumulative Update for .NET Framework 3.5 and 4.8.1 for Windows 11, version 24H2 for x64 (KB5039894) Windows 11 Security Updates 2024/07/09  70.9 MB
 ```
-## Triggers
+## Set Triggers
 Set triggers to get better results:
 
--AllPages Get results of maximum 1000 hits
--ExcludeFramework no .NET Framework updates
--GetFramework Retrieve .NET Framework updates
+```powershell
+-AllPages           Get results of maximum 1000 hits
+-ExcludeFramework   Exclude   .NET Framework updates
+-GetFramework       Retrieve  .NET Framework updates
+```
 
 ## Save-MSCatalogUpdate
 
