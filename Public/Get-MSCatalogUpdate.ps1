@@ -34,7 +34,14 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
         $Rows = @() 
         $PageCount = 0
 
-        $Uri = "https://www.catalog.update.microsoft.com/Search.aspx?q=$([uri]::EscapeDataString($Search))"
+
+        if ($Strict) {
+            $EncodedSearch = [uri]::EscapeDataString('"' + $Search + '"') 
+        } else {
+            $EncodedSearch = [uri]::EscapeDataString($Search)
+        }
+    
+        $Uri = "https://www.catalog.update.microsoft.com/Search.aspx?q=$EncodedSearch"
         $Res = Invoke-CatalogRequest -Uri $Uri
         $Rows = $Res.Rows
 
@@ -47,9 +54,11 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
                 }
             } 
 
-        if ($Strict) { 
-            $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*$Search*"})
-            }
+        if ($Rows.Count -ge 1000) {
+            Write-Host "`nMax Result limit of 1000 hit, please refine your search criteria"
+        } 
+        Write-Host "`nSearch completed. Total rows: $($Rows.Count)"
+
 
         if ($ExcludeDynamic) {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -notlike "*Dynamic*"})  
