@@ -54,12 +54,6 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
                 }
             } 
 
-        if ($Rows.Count -ge 1000) {
-            Write-Host "`nMax Result limit of 1000 hit, please refine your search criteria"
-        } 
-        Write-Host "`nSearch completed. Total rows: $($Rows.Count)"
-
-
         if ($ExcludeDynamic) {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -notlike "*Dynamic*"})  
             }
@@ -87,6 +81,13 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
         if ($GetFramework) {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*Framework*"})  
             }
+
+        Write-Host "`nFiltered search completed. Total rows: $($Rows.Count)"
+
+        if ($Rows.Count -ge 1000) {
+            Write-Host "`nMax Result limit of 1000 hit, please refine your search criteria"
+        } 
+
 
        if ($Rows.Count -gt 0) {
            foreach ($Row in $Rows) {
