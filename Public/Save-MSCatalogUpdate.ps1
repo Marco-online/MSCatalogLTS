@@ -11,7 +11,9 @@ function Save-MSCatalogUpdate {
             ParameterSetName = "ByGuid")]
         [String] $Guid,
 
-        [String] $Destination
+        [String] $Destination,
+
+        [switch] $DownloadAll
     )
 
     if ($Update) {
@@ -19,31 +21,51 @@ function Save-MSCatalogUpdate {
     }
 
     $Links = Get-UpdateLinks -Guid $Guid
-    if ($Links.Count -eq 1) {
+    if (-not $Links) {
+        Write-Warning "No valid download links found for GUID '$Guid'."
+        return
+    }
 
-        $name = $Links.Split('/')[-1]
+    $ProgressPreference = 'SilentlyContinue'
+    $SuccessCount = 0
+    $TotalCount = if ($DownloadAll) { $Links.Count } else { 1 }
+    
+    Write-Output "Found $($Links.Count) download links for GUID '$Guid'. $(if (-not $DownloadAll -and $Links.Count -gt 1) {"Using -DownloadAll to download all files."})"
+
+    $LinksToProcess = if ($DownloadAll) { $Links } else { $Links | Select-Object -First 1 }
+
+    foreach ($Link in $LinksToProcess) {
+        $url = $Link.URL
+        $name = $url.Split('/')[-1]
         $cleanname = $name.Split('_')[0]
         $extension = ".msu"
         $CleanOutFile = $cleanname + $extension
 
         $OutFile = Join-Path -Path $Destination -ChildPath $CleanOutFile
-        $ProgressPreference = 'SilentlyContinue'
-
+        
         if (Test-Path -Path $OutFile) {
             Write-Warning "File already exists: $CleanOutFile. Skipping download."
-            return
-        } else {
-            Set-TempSecurityProtocol
-            Invoke-WebRequest -Uri $Links -OutFile $OutFile -ErrorAction Stop
-            Set-TempSecurityProtocol -ResetToDefault
+            continue
         }
 
-        if (Test-Path -Path $OutFile) {
-            Write-Output "Successfully downloaded file $CleanOutFile to $Destination"
-        } else {
-            Write-Warning "Downloading file $CleanOutFile failed."
+        try {
+            Write-Output "Downloading $CleanOutFile..."
+            Set-TempSecurityProtocol
+            Invoke-WebRequest -Uri $url -OutFile $OutFile -ErrorAction Stop
+            Set-TempSecurityProtocol -ResetToDefault
+            
+            if (Test-Path -Path $OutFile) {
+                Write-Output "Successfully downloaded file $CleanOutFile to $Destination"
+                $SuccessCount++
+            }
+            else {
+                Write-Warning "Downloading file $CleanOutFile failed."
+            }
         }
-    } else {
-        Write-Warning "No valid download link found for GUID '$Guid'."
+        catch {
+            Write-Warning "Error downloading $CleanOutFile : $_"
+        }
     }
+
+    Write-Output "Download complete: $SuccessCount of $TotalCount files downloaded successfully."
 }

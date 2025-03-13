@@ -36,11 +36,9 @@ function Get-UpdateLinks {
     $KbLinks = foreach ($Match in $DownloadMatches) {
         [PSCustomObject]@{
             URL = $Match.Groups[1].Value
-            KB  = [int]$Match.Groups[2].Value
+            KB  = if ($Match.Groups.Count -gt 2 -and $Match.Groups[2].Success) { [int]$Match.Groups[2].Value } else { 0 }
         }
     }
     
-    $Links = $KbLinks | Sort-Object KB -Descending
-    $Links[0].URL
-	}
-    
+    return $KbLinks | Sort-Object KB -Descending
+}
