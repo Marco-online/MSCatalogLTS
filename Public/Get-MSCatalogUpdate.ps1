@@ -17,15 +17,18 @@ function Get-MSCatalogUpdate {
         [switch] $Strict,
 
         [Parameter(Mandatory = $false)]
-        [switch] $GetFramework
+        [switch] $GetFramework,
+        
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("all", "x64", "x86", "arm64")]
+        [string] $Architecture = "all",
+        
+        [Parameter(Mandatory = $false)]
+        [switch] $IncludePreview,
+        
+        [Parameter(Mandatory = $false)]
+        [switch] $IncludeDynamic
     )
-    
-# Default settings for the search
-    
-$Bit64 = $true  # Include only x64 updates
-$ExcludePreview = $true # Exclude Preview updates
-$ExcludeDynamic = $true # Exclude Dynamic updates
-
 
    try {
        $ProgPref = $ProgressPreference
@@ -54,11 +57,11 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
                 }
             } 
 
-        if ($ExcludeDynamic) {
+        if (-not $IncludeDynamic) {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -notlike "*Dynamic*"})  
             }
 
-        if ($ExcludePreview) {
+        if (-not $IncludePreview) {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -notlike "*Preview*"})  
             }
 
@@ -66,9 +69,19 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -notlike "*Framework*"})  
             }
 
-        if ($Bit64) {
-            $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*x64*" -or $_.SelectNodes("td")[1].InnerText.Trim() -like "*64-Bit*"})  
+        if ($Architecture -ne "all") {
+            switch ($Architecture) {
+                "x64" { 
+                    $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*x64*" -or $_.SelectNodes("td")[1].InnerText.Trim() -like "*64-Bit*"})
+                }
+                "x86" {
+                    $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*x86*" -or $_.SelectNodes("td")[1].InnerText.Trim() -like "*32-Bit*"})
+                }
+                "arm64" {
+                    $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*arm64*" -or $_.SelectNodes("td")[1].InnerText.Trim() -like "*ARM*"})
+                }
             }
+        }
 
         if ($Search -match "Windows 10") {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*Windows 10*"})  
@@ -76,6 +89,10 @@ $ExcludeDynamic = $true # Exclude Dynamic updates
 
         if ($Search -match "Windows 11") {
             $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*Windows 11*"})  
+            }
+
+        if ($Search -match "Windows Server") {
+            $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*Windows Server*"})  
             }
 
         if ($GetFramework) {
