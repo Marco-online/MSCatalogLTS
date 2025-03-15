@@ -37,11 +37,12 @@ function Get-MSCatalogUpdate {
         $Rows = @() 
         $PageCount = 0
 
-
         if ($Strict) {
             $EncodedSearch = [uri]::EscapeDataString('"' + $Search + '"') 
+        } elseif ($GetFramework){
+            $EncodedSearch = [uri]::EscapeDataString("*$Search*")
         } else {
-            $EncodedSearch = [uri]::EscapeDataString($Search)
+            $EncodedSearch = [uri]::EscapeDataString("$Search")
         }
     
         $Uri = "https://www.catalog.update.microsoft.com/Search.aspx?q=$EncodedSearch"
@@ -96,7 +97,7 @@ function Get-MSCatalogUpdate {
             }
 
         if ($GetFramework) {
-            $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*Framework*"})  
+            $Rows = $Rows.Where({$_.SelectNodes("td")[1].InnerText.Trim() -like "*Framework*" -or $_.SelectNodes("td")[1].InnerText.Trim() -like "*.NET Framework*"}) 
             }
 
         Write-Host "`nFiltered search completed. Total rows: $($Rows.Count)"
