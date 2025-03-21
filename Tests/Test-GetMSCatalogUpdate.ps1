@@ -172,19 +172,19 @@ Invoke-Test -Name "KB Number Search" -Parameters @{
     Search = "KB5035853"
 }
 
-# Test 1.2: Basic Windows 11 search
-Invoke-Test -Name "Windows 11 Search" -Parameters @{
-    Search = "Cumulative Update for Windows 11 Version 24H2 for x64"
-}
-
-# Test 1.3: Basic Windows 10 search
+# Test 1.2: Basic Windows 10 search
 Invoke-Test -Name "Windows 10 Search" -Parameters @{
-    Search = "Cumulative Update for Windows 10 Version 22H2 for x64"
+    Search = "Cumulative Update for Windows 10 Version 22H2"
 }
 
-# Test 1.4: Cumulative updates search
-Invoke-Test -Name "Cumulative Updates Search" -Parameters @{
-    Search = "Cumulative Update"
+# Test 1.3: Basic Windows 11 search
+Invoke-Test -Name "Windows 11 Search" -Parameters @{
+    Search = "Cumulative Update for Windows 11 Version 24H2"
+}
+
+# Test 1.4: Basic Windows Server search
+Invoke-Test -Name "Windows Server Search" -Parameters @{
+    Search = "Cumulative Update for Microsoft server operating system"
 }
 #endregion
 
@@ -198,6 +198,7 @@ Write-Host "`n### TEST GROUP: OPERATING SYSTEM PARAMETER ###" -ForegroundColor B
 Invoke-Test -Name "Windows 10 OS Parameter" -Parameters @{
     OperatingSystem = "Windows 10"
     UpdateType = "Cumulative Updates"
+    Strict = $true
 } -Validation {
     param($result)
     ($result | Where-Object { $_.Title -match "Windows 10" }).Count -gt 0
@@ -207,6 +208,7 @@ Invoke-Test -Name "Windows 10 OS Parameter" -Parameters @{
 Invoke-Test -Name "Windows 11 OS Parameter" -Parameters @{
     OperatingSystem = "Windows 11"
     UpdateType = "Cumulative Updates"
+    Strict = $true
 } -Validation {
     param($result)
     ($result | Where-Object { $_.Title -match "Windows 11" }).Count -gt 0
@@ -216,6 +218,7 @@ Invoke-Test -Name "Windows 11 OS Parameter" -Parameters @{
 Invoke-Test -Name "Windows Server OS Parameter" -Parameters @{
     OperatingSystem = "Windows Server"
     UpdateType = "Cumulative Updates"
+    Strict = $true
 } -Validation {
     param($result)
     ($result | Where-Object { $_.Title -match "Microsoft server operating system" }).Count -gt 0
@@ -228,24 +231,34 @@ Invoke-Test -Name "Windows Server OS Parameter" -Parameters @{
 # ======================================================
 Write-Host "`n### TEST GROUP: OS + VERSION PARAMETER ###" -ForegroundColor Blue -BackgroundColor White
 
-# Test 3.1: Windows 11 Version 22H2 with UpdateType
-Invoke-Test -Name "Windows 11 + Version 22H2" -Parameters @{
+# Test 3.1: Windows 11 Version 24H2 with UpdateType
+Invoke-Test -Name "Windows 11 + Version 24H2" -Parameters @{
     OperatingSystem = "Windows 11"
+    Version = "24H2"
+    UpdateType = "Cumulative Updates"
+} -Validation {
+    param($result)
+    ($result | Where-Object { $_.Title -match "Windows 11.*(24H2|Version 24H2)" }).Count -gt 0
+}
+
+# Test 3.2: Windows 10 Version 22H2 with UpdateType
+Invoke-Test -Name "Windows 10 + Version 22H2" -Parameters @{
+    OperatingSystem = "Windows 10"
     Version = "22H2"
     UpdateType = "Cumulative Updates"
 } -Validation {
     param($result)
-    ($result | Where-Object { $_.Title -match "Windows 11.*(22H2|Version 22H2)" }).Count -gt 0
+    ($result | Where-Object { $_.Title -match "Windows 10.*(22H2|Version 22H2)" }).Count -gt 0
 }
 
-# Test 3.2: Windows 10 Version 21H2 with UpdateType
-Invoke-Test -Name "Windows 10 + Version 21H2" -Parameters @{
-    OperatingSystem = "Windows 10"
-    Version = "21H2"
+# Test 3.3: Windows Server Version 22H2 with UpdateType
+Invoke-Test -Name "Windows Server + Version 22H2" -Parameters @{
+    OperatingSystem = "Windows Server"
+    Version = "22H2"
     UpdateType = "Cumulative Updates"
 } -Validation {
     param($result)
-    ($result | Where-Object { $_.Title -match "Windows 10.*(21H2|Version 21H2)" }).Count -gt 0
+    ($result | Where-Object { $_.Title -match "Microsoft server operating system.*(22H2|Version 22H2)" }).Count -gt 0
 }
 #endregion
 
