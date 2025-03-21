@@ -1,7 +1,29 @@
-Clear-Host
+<#
+.SYNOPSIS
+    Tests the functionality of the Get-MSCatalogUpdate cmdlet.
 
-# Test-GetMSCatalogUpdate.ps1
-# This script tests the key parameters of the Get-MSCatalogUpdate function
+.DESCRIPTION
+    This script contains test cases for verifying the behavior and functionality
+    of the Get-MSCatalogUpdate cmdlet. It ensures that the cmdlet correctly
+    retrieves updates from the Microsoft Update Catalog based on various criteria
+    and parameters.
+
+.NOTES
+    Name:        Test-GetMSCatalogUpdate.ps1
+    Author:      Mickaël CHAVE
+    Created:     03/21/2025
+    Version:     1.0.0
+    Repository:  https://github.com/Marco-online/MSCatalogLTS
+    License:     MIT License
+
+.LINK
+    https://github.com/Marco-online/MSCatalogLTS
+
+.EXAMPLE
+    .\Test-GetMSCatalogUpdate.ps1
+#>
+
+Clear-Host
 
 #region Module Import
 # Import the module
