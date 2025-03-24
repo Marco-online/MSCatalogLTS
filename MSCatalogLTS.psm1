@@ -1,4 +1,3 @@
-
 try {
     if (!([System.Management.Automation.PSTypeName]'HtmlAgilityPack.HtmlDocument').Type) {
         if ($PSVersionTable.PSEdition -eq "Desktop") {
@@ -12,11 +11,20 @@ try {
     throw
 }
 
-$Public = @(Get-ChildItem -Path $PSScriptRoot\Public\*.ps1)
-$Private = @(Get-ChildItem -Path $PSScriptRoot\Private\*.ps1)
 $Classes = @(Get-ChildItem -Path $PSScriptRoot\Classes\*.ps1)
+$Private = @(Get-ChildItem -Path $PSScriptRoot\Private\*.ps1)
+$Public = @(Get-ChildItem -Path $PSScriptRoot\Public\*.ps1)
 
-foreach ($Module in ($Public + $Private + $Classes)) {
+foreach ($ClassFile in $Classes) {
+    try {
+        . $ClassFile.FullName
+    } catch {
+        Write-Error -Message "Failed to import class $($ClassFile.FullName): $_"
+        throw
+    }
+}
+
+foreach ($Module in ($Private + $Public)) {
     try {
         . $Module.FullName
     } catch {
