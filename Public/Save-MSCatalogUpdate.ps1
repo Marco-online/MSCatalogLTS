@@ -38,7 +38,7 @@ function Save-MSCatalogUpdate {
         $url = $Link.URL
         $name = $url.Split('/')[-1]
         $cleanname = $name.Split('_')[0]
-        $extension = ".msu"
+        $extension = Split-Path -Path $name -Extension
         $CleanOutFile = $cleanname + $extension
 
         $OutFile = Join-Path -Path $Destination -ChildPath $CleanOutFile
