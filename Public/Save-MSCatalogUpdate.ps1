@@ -11,7 +11,8 @@ function Save-MSCatalogUpdate {
             ParameterSetName = "ByGuid")]
         [String] $Guid,
 
-        [String] $Destination,
+        [Parameter(Position = 1)]
+        [String] $Destination = (Get-Location).Path,
 
         [switch] $DownloadAll
     )
@@ -26,11 +27,23 @@ function Save-MSCatalogUpdate {
         return
     }
 
+    # Check if destination directory exists and create it if needed
+    if (-not (Test-Path -Path $Destination -PathType Container)) {
+        try {
+            New-Item -Path $Destination -ItemType Directory -Force -ErrorAction Stop | Out-Null
+            Write-Output "Created destination directory: $Destination"
+        }
+        catch {
+            Write-Error "Failed to create destination directory '$Destination': $_"
+            return
+        }
+    }
+
     $ProgressPreference = 'SilentlyContinue'
     $SuccessCount = 0
     $TotalCount = if ($DownloadAll) { $Links.Count } else { 1 }
     
-    Write-Output "Found $($Links.Count) download links for GUID '$Guid'. $(if (-not $DownloadAll -and $Links.Count -gt 1) {"Using -DownloadAll to download all files."})"
+    Write-Output "Found $($Links.Count) download links for GUID '$Guid'. $(if (-not $DownloadAll -and $Links.Count -gt 1) {"Only downloading the first file. Use -DownloadAll to download all files."})"
 
     $LinksToProcess = if ($DownloadAll) { $Links } else { $Links | Select-Object -First 1 }
 
@@ -38,7 +51,14 @@ function Save-MSCatalogUpdate {
         $url = $Link.URL
         $name = $url.Split('/')[-1]
         $cleanname = $name.Split('_')[0]
-        $extension = Split-Path -Path $name -Extension
+        
+        # Determine extension based on URL or use .msu as default
+        $extension = if ($url -match '\.(cab|exe|msi|msp|msu)$') {
+            ".$($matches[1])"
+        } else {
+            ".msu"
+        }
+        
         $CleanOutFile = $cleanname + $extension
 
         $OutFile = Join-Path -Path $Destination -ChildPath $CleanOutFile
