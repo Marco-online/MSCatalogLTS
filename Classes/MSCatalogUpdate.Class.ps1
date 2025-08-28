@@ -1,4 +1,4 @@
-class MsCatalogUpdate {
+class MSCatalogUpdate {
     [string] $Title
     [string] $Products
     [string] $Classification
@@ -9,9 +9,9 @@ class MsCatalogUpdate {
     [string] $Guid
     [string[]] $FileNames
 
-    MsCatalogUpdate() {}
+    MSCatalogUpdate() {}
 
-    MsCatalogUpdate($Row, $IncludeFileNames) {
+    MSCatalogUpdate($Row, $IncludeFileNames) {
         $Cells = $Row.SelectNodes("td")
         $this.Title = $Cells[1].innerText.Trim()
         $this.Products = $Cells[2].innerText.Trim()
