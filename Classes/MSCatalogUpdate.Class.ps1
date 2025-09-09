@@ -22,7 +22,7 @@ class MSCatalogUpdate {
         $this.SizeInBytes = [Int64] $Cells[6].SelectNodes("span")[1].InnerText 
         $this.Guid = $Cells[7].SelectNodes("input")[0].Id
         $this.FileNames = if ($IncludeFileNames) {
-            $Links = Get-UpdateLinks -Guid $Cells[7].SelectNodes("input")[0].Id
+            $Links = Get-MSCatalogUpdateLink -Guid $Cells[7].SelectNodes("input")[0].Id
             foreach ($Link in $Links.Matches) {
                 $Link.Value.Split('/')[-1]
             }
