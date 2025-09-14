@@ -8,7 +8,7 @@
     RootModule = 'MSCatalogLTS.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.0.7'
+    ModuleVersion = '1.0.8'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -23,7 +23,7 @@
     CompanyName = ''
 
     # Copyright statement for this module
-    Copyright = '(c) 2024 Marco-online All rights reserved.'
+    Copyright = '(c) 2025 Marco-online All rights reserved.'
 
     # Description of the functionality provided by this module
     Description = 'MSCatalogLTS is a Long-term support module for searching and downloading Windows updates'
