@@ -37,12 +37,13 @@
 
     $filePath = $Destination
     if (Test-Path -Path $filePath) {
-        $existingData = Import-Excel -Path $filePath -WorksheetName $WorksheetName
+        $existingData = Import-Excel -Path $filePath -WorksheetName $WorksheetName -DataOnly
         if ($existingData.Guid -contains $Update.Guid) {
-        return
+            return
     }
-        $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -Append -AutoSize -TableStyle Light1
-    } else {
-        $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -AutoSize -TableStyle Light1
+        $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -Append -AutoSize -TableStyle Light1 -KillExcel
+    }
+    else {
+        $data | Export-Excel -Path $filePath -WorksheetName $WorksheetName -AutoSize -TableStyle Light1 -KillExcel
     }
 }
