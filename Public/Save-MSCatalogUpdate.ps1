@@ -9,6 +9,8 @@ function Save-MSCatalogUpdate {
         [Parameter(Position = 2)]
         [String] $Destination = (Get-Location).Path,
 
+        [switch] $Force,
+
         [switch] $DownloadAll
     )
 
@@ -40,20 +42,26 @@ function Save-MSCatalogUpdate {
     }
 
     end {
-        # Filter out updates with valid GUIDs
-        $ValidUpdates = $AllUpdates | Where-Object { $_.Guid -and $_.Guid -ne '' }
+        # Fixes #21, Fixes #19
+        # Drop empty entries 
+        $GuidsToProcess = $GuidsToProcess | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
-        # Sort by Title to find the latest update
-        $LatestUpdate = $ValidUpdates |
-            Sort-Object -Property Title -Descending |
-            Select-Object -First 1
+        if (-not $GuidsToProcess -or $GuidsToProcess.Count -eq 0) {
+             # Filter out updates with valid GUIDs
+            $ValidUpdates = $AllUpdates | Where-Object { $_.Guid -and $_.Guid -ne '' }
 
-        if ($LatestUpdate -and $LatestUpdate.Guid) {
-            Write-Output "Selected latest update: $($LatestUpdate.Title)"
-            $GuidsToProcess = @($LatestUpdate.Guid)
-        } else {
-            Write-Warning "No valid update found with a GUID."
-            return
+            if ($ValidUpdates -and $ValidUpdates.Count -gt 0) {
+                # Sort by Title to find the latest update
+                $GuidsToProcess = $ValidUpdates |
+                    Sort-Object -Property Title -Descending |
+                    ForEach-Object { $_.Guid } |
+                    Select-Object -First 1 |
+                    Select-Object -Unique
+                Write-Output "Selected $($GuidsToProcess.Count) update(s) from pipeline."
+            } else {
+                Write-Warning "No valid update found with a GUID."
+                return
+            }
         }
 
         foreach ($GuidItem in $GuidsToProcess) {
@@ -88,9 +96,16 @@ function Save-MSCatalogUpdate {
                 $CleanOutFile = $cleanname + $extension
                 $OutFile = Join-Path -Path $Destination -ChildPath $CleanOutFile
 
-                if (Test-Path -Path $OutFile) {
-                    Write-Warning "File already exists: $CleanOutFile. Skipping download."
-                    continue
+                #Force overwrite check / Fixes#22
+                if (Test-Path -Path $outFile) {
+
+                    if ($Force) {
+                        # Do nothing — allow download to overwrite
+                    }
+                    else {
+                        Write-Warning "File already exists: $CleanOutFile. Skipping download."
+                        continue
+                    }
                 }
 
                 try {
