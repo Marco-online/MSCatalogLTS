@@ -402,9 +402,15 @@ function Get-MSCatalogUpdate {
                 default { $Updates }
             }
 
-            # Display result summary
-            Write-Host "`nSearch completed for: $searchQuery"
-            Write-Host "Found $($Updates.Count) updates"
+            # Display result summary but Silent if $Update variable or piped is used Fixes#23
+            $IsUpdate = ($MyInvocation.Line -match '^\s*\$update\s*=')
+            $IsPiped = ($PSCmdlet.MyInvocation.PipelineLength -gt 1)
+
+            if (-not $IsUpdate -and -not $IsPiped) {
+                Write-Host "`nSearch completed for: $searchQuery"
+                Write-Host "Found $($Updates.Count) updates"
+            }
+
             if ($Updates.Count -ge $MaxResults) {
                 Write-Warning "Result limit of $MaxResults reached. Please refine your search criteria."
             }
