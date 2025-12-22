@@ -5,6 +5,10 @@ It is cross-platform and runs on both Desktop and Core versions of PowerShell.
 
 [![psgallery](https://img.shields.io/powershellgallery/v/mscataloglts?style=flat-square&logo=powershell)](https://www.powershellgallery.com/packages/MSCatalogLTS)
 
+
+# MSCatalogLTS
+[![PSGallery Version](https://img.shields.io/powershellgallery/v/MSCatalogLTS.svg?style=flat&logo=powershell&label=PSGallery%20Version)](https://www.powershellgallery.com/packages/MSCatalogLTS) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/MSCatalogLTS.svg?style=flat&logo=powershell&label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/MSCatalogLTS) [![PowerShell](https://img.shields.io/badge/PowerShell-5.1-blue?style=flat&logo=powershell)](https://www.powershellgallery.com/packages/MSCatalogLTS) [![PSGallery Platform](https://img.shields.io/badge/platform-Windows-blue?logo=windows)](https://www.powershellgallery.com/packages/MSCatalogLTS)
+
 ## Quick Install
 
 ``` powershell
