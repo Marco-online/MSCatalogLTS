@@ -70,15 +70,35 @@ function Save-MSCatalogUpdate {
                 continue
             }
 
+            # Get update links ONCE
             $Links = Get-UpdateLinks -Guid $GuidItem
-            if (-not $Links) {
+            
+            # Filter out invalid links (null, empty, or missing URL)
+            if ($Links) {
+                $Links = @($Links | Where-Object { $_ -and $_.URL -and $_.URL.Trim() -ne "" })
+                
+                # Remove duplicates
+                $UniqueLinks = @()
+                $SeenUrls = @{}
+                foreach ($Link in $Links) {
+                    if (-not $SeenUrls.ContainsKey($Link.URL)) {
+                        $UniqueLinks += $Link
+                        $SeenUrls[$Link.URL] = $true
+                    }
+                }
+                $Links = $UniqueLinks
+            }
+
+            # Check if link is valid
+            if (-not $Links -or $Links.Count -eq 0) {
                 Write-Warning "No valid download links found for GUID '$GuidItem'."
                 continue
             }
 
-            $TotalCount = if ($DownloadAll) { $Links.Count } else { 1 }
-            Write-Output "Found $($Links.Count) download links for GUID '$GuidItem'. $(if (-not $DownloadAll -and $Links.Count -gt 1) {"Only downloading the first file. Use -DownloadAll to download all files."})"
+            $TotalCount = if ($DownloadAll) { $Links.Count } else { 1 }           
+            Write-Output "Found $($Links.Count) download link$(if ($Links.Count -ne 1) {'s'}) for GUID '$GuidItem'. $(if (-not $DownloadAll -and $Links.Count -gt 1) {"Only downloading the first file. Use -DownloadAll to download all files."})"
 
+            # Select links to process
             $LinksToProcess = if ($DownloadAll) { $Links } else { $Links | Select-Object -First 1 }
             $SuccessCount = 0
 
@@ -86,6 +106,7 @@ function Save-MSCatalogUpdate {
                 $url = $Link.URL
                 $name = $url.Split('/')[-1]
                 $cleanname = $name.Split('_')[0]
+                
                 # Determine extension based on URL or use .msu as default
                 $extension = if ($url -match '\.(cab|exe|msi|msp|msu)$') {
                     ".$($matches[1])"
@@ -96,18 +117,16 @@ function Save-MSCatalogUpdate {
                 $CleanOutFile = $cleanname + $extension
                 $OutFile = Join-Path -Path $Destination -ChildPath $CleanOutFile
 
-                #Force overwrite check / Fixes#22
-                if (Test-Path -Path $outFile) {
-
+                # Force overwrite check / Fixes#22
+                if (Test-Path -Path $OutFile) {
                     if ($Force) {
                         # Do nothing — allow download to overwrite
                     }
                     else {
-                        Write-Warning "File already exists: $CleanOutFile. Skipping download."
+                        Write-Warning "File already exists: $CleanOutFile Skipping download."
                         continue
                     }
                 }
-
                 try {
                     Write-Output "Downloading $CleanOutFile..."
                     Set-TempSecurityProtocol
@@ -125,8 +144,7 @@ function Save-MSCatalogUpdate {
                     Write-Warning "Error downloading $CleanOutFile : $_"
                 }
             }
-
-            Write-Output "Download complete: $SuccessCount of $TotalCount files downloaded successfully."
+            Write-Output "Download complete: $SuccessCount of $TotalCount file$(if ($TotalCount -ne 1) {'s'}) downloaded successfully."
         }
     }
 }
