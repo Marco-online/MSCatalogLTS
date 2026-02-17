@@ -135,7 +135,11 @@ function Get-MSCatalogUpdate {
 
         [Parameter(Mandatory = $false,
             HelpMessage = "Append to existing export file instead of overwriting")]
-        [switch] $Append
+        [switch] $Append,
+
+        [Parameter(Mandatory = $false,
+            HelpMessage = "Filter by date token (e.g., '2024-10' to match any date in October 2024)")]
+        [string] $Date
         #endregion Parameters
     )
 
@@ -185,19 +189,48 @@ function Get-MSCatalogUpdate {
                 $Descending = $true
                 Write-Verbose "Applied default Descending=$Descending for Search parameter"
             }
-            
+   
             # Check for update type prefix in search (Servicing Stack, Dynamic Update, etc.)
-            # BUT NOT .NET Framework - that's a product name, not an update type
             $updateTypePrefix = ""
-            if ($Search -match '^(Servicing Stack|Dynamic Update|Security Update|Cumulative Update|Feature Update)\s+(.+)$' -and $Search -notmatch '\.NET') {
-                $updateTypePrefix = $matches[1]
-                $remainingSearch = $matches[2]
-                Write-Debug "Detected update type prefix: '$updateTypePrefix', remaining search: '$remainingSearch'"
+            
+            # Extract date token from search string or -Date parameter
+            $script:DateToken = $null
+            if ($Date) {
+                # User provided explicit -Date parameter
+                $script:DateToken = $Date
+                Write-Debug "Date parameter provided: '$Date'"
+            } elseif ($Search -match '(\d{4}-\d{2}(?:-\d{2})?)') {
+                # Extract date token from search string (e.g., "2024-10" or "2024-10-15")
+                $script:DateToken = $matches[1]
+                Write-Debug "Date token detected in search: '$script:DateToken'"
+            }
+            
+            # Handle update type prefix extraction while preserving date
+            if ($Search -match '^((?:\d{4}-\d{2}(?:-\d{2})?\s+)?)(Servicing Stack|Dynamic Update|Security Update|Cumulative Update|Feature Update)\s+for\s+(.+)$' -and $Search -notmatch '\.NET') {
+                $datePrefix = $matches[1].Trim()  
+                $updateTypePrefix = $matches[2] 
+                $remainingSearch = $matches[3]
+                
+                Write-Debug "Detected update type prefix: '$updateTypePrefix', remaining search: 'for $remainingSearch'"
+                
+                # If date was in the prefix, preserve it
+                if ($datePrefix) {
+                    $remainingSearch = "$datePrefix for $remainingSearch"
+                    Write-Debug "Preserved date prefix in search: '$datePrefix'"
+                } else {
+                    $remainingSearch = "for $remainingSearch"
+                }
                 
                 $script:UpdateTypePrefix = $updateTypePrefix
                 $Search = $remainingSearch
             } else {
                 $script:UpdateTypePrefix = $null
+            }
+            
+            # If -Date parameter is provided but date is NOT in the search string, inject it
+            if ($Date -and $Search -notmatch [regex]::Escape($Date)) {
+                $Search = "$Date $Search"
+                Write-Debug "Injected date into search: '$Search'"
             }
             
             # Special handling for .NET Framework searches
@@ -274,7 +307,9 @@ function Get-MSCatalogUpdate {
             }
             
             # Pattern matching: OS + Version + R2 (optional) + Architecture (optional)
-            if (-not $script:DotNetParsed -and $Search -match '(Windows Server|Windows 10|Windows 11)\s+(?:Version\s+)?(\d{2}H[12]|\d{4})(\s+R2)?(?:\s+(x64|x86|arm64))?') {
+            $hasUpdateTypeKeyword = $Search -match '(Servicing Stack|Dynamic|Cumulative|Security|Preview|Quality|Feature)\s+(Update|Pack)'
+            
+            if (-not $script:DotNetParsed -and -not $hasUpdateTypeKeyword -and $Search -match '(Windows Server|Windows 10|Windows 11)\s+(?:Version\s+)?(\d{2}H[12]|\d{4})(\s+R2)?(?:\s+(x64|x86|arm64))?') {
                 $OperatingSystem = $matches[1]
                 $Version = $matches[2]
                 $R2Suffix = $matches[3]
@@ -302,6 +337,8 @@ function Get-MSCatalogUpdate {
                         Write-Debug "Architecture parameter was explicitly set to: $Architecture (ignoring detected: $($matches[4]))"
                     }
                 }
+            } elseif ($hasUpdateTypeKeyword) {
+                Write-Debug "Skipping OS behavior - detected update type keyword in search, will use literal search"
             }
         }
 
@@ -340,7 +377,7 @@ function Get-MSCatalogUpdate {
                 $script:VersionForFiltering = $mappedVersion
                 
                 # Special handling for .NET Framework searches
-                if ($script:IsDotNetFrameworkSearch) {
+                if ($script:IsDotNetFrameworkSearch -or $GetFramework) {
                     $osPhrase = switch ($OperatingSystem) {
                         "Windows 10" { "Windows 10, version $mappedVersion" }
                         "Windows 11" { "Windows 11, version $mappedVersion" }
@@ -439,6 +476,12 @@ function Get-MSCatalogUpdate {
                 $script:VersionForFiltering = $null
                 $script:IsR2Version = $false
                 
+                # If GetFramework is specified, prepend ".NET Framework" to the search
+                if ($GetFramework -and $Search -notmatch '\.NET|Framework') {
+                    $Search = ".NET Framework $Search"
+                    Write-Debug "GetFramework specified, modified search to: '$Search'"
+                }
+                
                 if (-not $Strict) {
                     $cleanSearch = $Search -replace '\s+for\s+(x64|x86|arm64).*$', '' `
                                             -replace '\s+\((x64|x86|arm64)\).*$', '' `
@@ -488,7 +531,6 @@ function Get-MSCatalogUpdate {
 
             $EncodedSearch = switch ($true) {
                 $useStrictSearch { [uri]::EscapeDataString('"' + $searchQuery + '"') }
-                $GetFramework { [uri]::EscapeDataString("*$searchQuery*") }
                 default { [uri]::EscapeDataString($searchQuery) }
             }
 
@@ -578,6 +620,14 @@ function Get-MSCatalogUpdate {
                 if ($script:UpdateTypePrefix) {
                     if (-not ($title -like "*$script:UpdateTypePrefix*")) {
                         Write-Debug "Excluded (Update type prefix '$script:UpdateTypePrefix' not found): $title"
+                        $include = $false
+                    }
+                }
+              
+                # Date token filtering
+                if ($script:DateToken) {
+                    if (-not ($title -like "*$script:DateToken*")) {
+                        Write-Debug "Excluded (Date token '$script:DateToken' not found): $title"
                         $include = $false
                     }
                 }
