@@ -7,7 +7,7 @@
     RootModule = 'MSCatalogLTS.psm1'
 
     # Version number of this module.
-    ModuleVersion = '2.1.0.0'
+    ModuleVersion = '2.1.0.1'
 
     # ID used to uniquely identify this module
     GUID = '721ac2a2-e4b6-4948-9c22-6ad2a52c0de6'
@@ -74,27 +74,17 @@
 
             # Release notes for this version
             ReleaseNotes = @'
-Version 2.1.0.0 - February 2026
+Version 2.1.0.1 - February 2026
 
 NEW FEATURES:
-* Auto-strict search for Windows queries
-* Edge channel filtering (-IsStable, -IsExtendedStable, -IsDev)
-* Direct export with duplicate detection (-ExportJson, -ExportCsv, -ExportXml, -Append)
-* Improved -Debug mode (no confirmation prompts)
-* Smart update type detection (Servicing Stack, Dynamic Update)
-* .NET Framework and Windows Server R2 filtering support
+* Added -Date Option Filter updates of specific date
 
 IMPROVEMENTS:
-* -Descending defaults to true (most recent first)
-* Upgraded HtmlAgilityPack to 1.12.4
-* Enhanced error messages with examples
-* Comprehensive debug logging
-* Completely rewritten documentation
-
-EXAMPLES:
-  Get-MSCatalogUpdate -Search "Windows 11 24H2"
-  Get-MSCatalogUpdate -Search "Edge x64" -IsStable
-  Get-MSCatalogUpdate -Search "Windows Server 2022" -ExportJson "updates.json" -Append
+* Fixed -GetFramework now works correctly
+* .NET Framework is added to the catalog query (OS and literal flows) instead of only client-side filtering/wildcards
+* Parser enhancement: smarter OS vs literal-search detection
+* Only trigger OS-behavior when appropriate; update-type phrases are treated as literal search text.
+* Query construction: refined for OS/version/arch and .NET Framework searches
 
 Fully backward compatible with v1.x
 
