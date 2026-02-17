@@ -87,17 +87,17 @@ $update = Get-MSCatalogUpdate -Search "Windows 11 24H2 x64" | Select-Object -Fir
 Save-MSCatalogUpdate -Update $update -Destination "C:\Updates" -DownloadAll
 
 # One-liner
-Get-MSCatalogUpdate -Search "Windows 11 24H2" | Select-Object -First 1 | Save-MSCatalogUpdate -Destination "C:\Updates" -DownloadAll
+Get-MSCatalogUpdate -Search "Windows 11 24H2 x64" | Select-Object -First 1 | Save-MSCatalogUpdate -Destination "C:\Updates" -DownloadAll
 ```
 
 ### Example 5: Export to JSON
 
 ```powershell
 # Export to JSON (overwrite)
-Get-MSCatalogUpdate -Search "Windows Server 2022" -LastDays 30 -ExportJson "C:\Updates\Updates.json"
+Get-MSCatalogUpdate -Search "Windows Server 2022 x64" -LastDays 30 -ExportJson "C:\Updates\Updates.json"
 
 # Export to JSON (append)
-Get-MSCatalogUpdate -Search "Windows Server 2022" -ExportJson "C:\Updates\Updates.json" -Append
+Get-MSCatalogUpdate -Search "Windows Server 2022 x64" -ExportJson "C:\Updates\Updates.json" -Append
 
 When -Append is used, existing entries are preserved and duplicate updates are automatically skipped
 Output: Appended 2 updates to JSON file: updates.json (skipped 23 duplicates)
