@@ -7,7 +7,7 @@
     RootModule = 'MSCatalogLTS.psm1'
 
     # Version number of this module.
-    ModuleVersion = '2.1.0.1'
+    ModuleVersion = '2.1.0.2'
 
     # ID used to uniquely identify this module
     GUID = '721ac2a2-e4b6-4948-9c22-6ad2a52c0de6'
