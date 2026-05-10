@@ -74,17 +74,23 @@
 
             # Release notes for this version
             ReleaseNotes = @'
-Version 2.1.0.1 - February 2026
+Version 2.1.0.2 - May 2026
 
-NEW FEATURES:
-* Added -Date Option Filter updates of specific date
+**Bug fixes**
+- Fix Get-MSCatalogUpdate -Search "<HWID GUID>" returning zero results — date-token regex no longer matches digit substrings inside GUIDs, KB numbers, or build versions
+- Fix inverted Get-Module -ListAvailable check in Save-MSCatalogOutput (would attempt import only when ImportExcel was *not* installed)
 
-IMPROVEMENTS:
-* Fixed -GetFramework now works correctly
-* .NET Framework is added to the catalog query (OS and literal flows) instead of only client-side filtering/wildcards
-* Parser enhancement: smarter OS vs literal-search detection
-* Only trigger OS-behavior when appropriate; update-type phrases are treated as literal search text.
-* Query construction: refined for OS/version/arch and .NET Framework searches
+**New: SupportUrl on update objects**
+- New [string] $SupportUrl property on MSCatalogUpdate
+- New private helper Get-UpdateSupportUrl (fetches from ScopedViewInline.aspx, parses suportUrlDiv)
+- Save-MSCatalogOutput fetches SupportUrl per row when empty
+
+**Save-MSCatalogOutput improvements**
+- Excel column renamed Guid to UpdateID; new SupportUrl column
+- Auto-creates worksheet if missing; rewrites sorted by LastUpdated
+- Worksheet tabs sorted: numeric (01, 02, …) by value, non-numeric alphabetically at end
+- Dedup checks both legacy Guid and new UpdateID columns
+- Legacy Guid-column sheets are migrated to the new schema on next write
 
 Fully backward compatible with v1.x
 
