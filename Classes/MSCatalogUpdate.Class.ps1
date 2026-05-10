@@ -8,6 +8,7 @@ class MSCatalogUpdate {
     [string] $SizeInBytes 
     [string] $Guid
     [string[]] $FileNames
+    [string] $SupportUrl
 
     MSCatalogUpdate() {}
 
