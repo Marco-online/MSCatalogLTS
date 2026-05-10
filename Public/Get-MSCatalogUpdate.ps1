@@ -199,8 +199,8 @@ function Get-MSCatalogUpdate {
                 # User provided explicit -Date parameter
                 $script:DateToken = $Date
                 Write-Debug "Date parameter provided: '$Date'"
-            } elseif ($Search -match '(\d{4}-\d{2}(?:-\d{2})?)') {
-                # Extract date token from search string (e.g., "2024-10" or "2024-10-15")
+            } elseif ($Search -match '(?<!\d)(20\d{2}-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?)(?!\d)') {
+                # Extract date token from search string (e.g., "2024-10" or "2024-10-15") for HWID GUIDs, KB numbers, build versions, etc.
                 $script:DateToken = $matches[1]
                 Write-Debug "Date token detected in search: '$script:DateToken'"
             }
