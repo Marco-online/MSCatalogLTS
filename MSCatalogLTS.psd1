@@ -92,6 +92,11 @@ Version 2.1.0.2 - May 2026
 - Dedup checks both legacy Guid and new UpdateID columns
 - Legacy Guid-column sheets are migrated to the new schema on next write
 
+**New: SHA1 hash in Excel output**
+- New [string] $SHA1 property
+- Now extracts the SHA1 digest from the same DownloadDialog.aspx response
+- Save-MSCatalogOutput fetches SHA1 and writes SHA1 column
+
 Fully backward compatible with v1.x
 
 More info: https://github.com/Marco-online/MSCatalogLTS

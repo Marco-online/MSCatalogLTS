@@ -9,6 +9,7 @@ class MSCatalogUpdate {
     [string] $Guid
     [string[]] $FileNames
     [string] $SupportUrl
+    [string] $SHA1
 
     MSCatalogUpdate() {}
 

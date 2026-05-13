@@ -30,23 +30,41 @@ function Get-UpdateLinks {
         Write-Verbose "No download links found in response."
         return $null
     }
-    
+
     Write-Verbose "Found $($DownloadMatches.Count) download link(s) in response."
-    
+
+    # Build a lookup of SHA1 digests (base64) keyed by "downloadInfoIndex_fileIndex"
+    $DigestRegex = "downloadInformation\[(\d+)\]\.files\[(\d+)\]\.digest\s*=\s*'([^']*)'"
+    $DigestMatches = [regex]::Matches($Links, $DigestRegex)
+    $DigestMap = @{}
+    foreach ($DigestMatch in $DigestMatches) {
+        $DigestKey = "$($DigestMatch.Groups[1].Value)_$($DigestMatch.Groups[2].Value)"
+        $DigestMap[$DigestKey] = $DigestMatch.Groups[3].Value
+    }
+
     $KbLinks = foreach ($Match in $DownloadMatches) {
-        $Url = $Match.Groups[3].Value  # URL is in Group 3 now
-        
+        $InfoIdx = $Match.Groups[1].Value
+        $FileIdx = $Match.Groups[2].Value
+        $Url = $Match.Groups[3].Value
+
         # Try to extract KB number from the URL (if present)
         $KbNumber = 0
         if ($Url -match 'kb(\d+)') {
             $KbNumber = [int]$Matches[1]
         }
-        
+
+        $Sha1Base64 = ""
+        $DigestKey = "${InfoIdx}_${FileIdx}"
+        if ($DigestMap.ContainsKey($DigestKey)) {
+            $Sha1Base64 = $DigestMap[$DigestKey]
+        }
+
         [PSCustomObject]@{
             URL = $Url
             KB  = $KbNumber
-            DownloadInfoIndex = [int]$Match.Groups[1].Value
-            FileIndex = [int]$Match.Groups[2].Value
+            DownloadInfoIndex = [int]$InfoIdx
+            FileIndex = [int]$FileIdx
+            SHA1 = $Sha1Base64
         }
     }
     

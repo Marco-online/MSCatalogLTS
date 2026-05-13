@@ -18,9 +18,17 @@ function Save-MSCatalogOutput {
         $Update = $Update | Select-Object -First 1
     }
 
-    # requires an extra HTTP request, so Get-MSCatalogUpdate leaves it empty by default.
+    # fetch SupportUrl if not already populated. The catalog detail page requires an extra HTTP request 
     if (-not $Update.SupportUrl) {
         $Update.SupportUrl = Get-UpdateSupportUrl -Guid $Update.Guid
+    }
+
+    # fetch SHA1 from the first download link.
+    if (-not $Update.SHA1) {
+        $FirstLink = Get-UpdateLinks -Guid $Update.Guid | Select-Object -First 1
+        if ($FirstLink -and $FirstLink.SHA1) {
+            $Update.SHA1 = [BitConverter]::ToString([Convert]::FromBase64String($FirstLink.SHA1)).Replace('-','')
+        }
     }
 
     $data = [PSCustomObject]@{
@@ -30,6 +38,7 @@ function Save-MSCatalogOutput {
         LastUpdated    = $Update.LastUpdated.ToString('yyyy/MM/dd')
         UpdateID       = $Update.Guid
         SupportUrl     = $Update.SupportUrl
+        SHA1           = $Update.SHA1
     }
 
     $filePath = $Destination
@@ -53,7 +62,7 @@ function Save-MSCatalogOutput {
         $existingIds = @($existingData.UpdateID) + @($existingData.Guid)
         if ($existingIds -contains $Update.Guid) { return }
 
-        # Migrate legacy "Guid" rows to new schema (UpdateID + SupportUrl)
+        # Migrate legacy "Guid" rows to new schema (UpdateID + SupportUrl + SHA1)
         $existingData = $existingData | ForEach-Object {
             [PSCustomObject]@{
                 Title          = $_.Title
@@ -62,6 +71,7 @@ function Save-MSCatalogOutput {
                 LastUpdated    = $_.LastUpdated
                 UpdateID       = if ($_.UpdateID) { $_.UpdateID } else { $_.Guid }
                 SupportUrl     = $_.SupportUrl
+                SHA1           = $_.SHA1
             }
         }
 
@@ -75,7 +85,7 @@ function Save-MSCatalogOutput {
         $excel = Open-ExcelPackage -Path $filePath
         $workbook = $excel.Workbook
 
-        # Numeric sheets (01, 02, ...) sort by value
+        # Numeric sheets (01, 02, ...) sort by value; non-numeric sheets land at the end alphabetically
         $sortedNames = $workbook.Worksheets.Name |
             Sort-Object { if ($_ -match '^\d+$') { [int]$_ } else { [int]::MaxValue } }, { $_ }
 
