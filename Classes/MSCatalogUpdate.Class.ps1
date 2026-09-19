@@ -25,8 +25,8 @@ class MSCatalogUpdate {
         $this.Guid = $Cells[7].SelectNodes("input")[0].Id
         $this.FileNames = if ($IncludeFileNames) {
             $Links = Get-UpdateLinks -Guid $Cells[7].SelectNodes("input")[0].Id
-            foreach ($Link in $Links.Matches) {
-                $Link.Value.Split('/')[-1]
+            foreach ($Link in $Links) {
+                $Link.URL.Split('/')[-1]
             }
         }
     }
